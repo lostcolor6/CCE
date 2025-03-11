@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 let label = document.createElement("span");
                 label.textContent = tabInfo.title || "Untitled Tab";
                 label.className = "tab-label";
+                label.onclick = () => {
+                    chrome.tabs.update(Number(tabId), { active: true });
+                };
 
                 // Create slider
                 let slider = document.createElement("input");
