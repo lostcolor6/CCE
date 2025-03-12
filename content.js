@@ -1,28 +1,45 @@
-// Get current tab ID
-const tabId = chrome.devtools.inspectedWindow.tabId;
-
 // Function to apply volume to media elements
+let tabId;
+
+// Get current tab ID from background script
+chrome.runtime.sendMessage({action: 'getTabId'}, (response) => {
+    tabId = response.tabId;
+});
+
 function applyVolume(volume) {
     document.querySelectorAll("video, audio").forEach(media => {
         media.volume = volume;
     });
 }
 
-// Get stored volume and apply it
-chrome.storage.sync.get(['soundTabs'], (result) => {
-    const volume = result.soundTabs?.[tabId]?.volume;
-    if (volume !== undefined) {
-        applyVolume(volume);
+// Get stored volume and apply it (after we have tabId)
+function applyStoredVolume() {
+    if (tabId) {
+        chrome.storage.sync.get(['soundTabs'], (result) => {
+            const volume = result.soundTabs?.[tabId]?.volume;
+            if (volume !== undefined) {
+                applyVolume(volume);
+            }
+        });
+    }
+}
+
+// Reapply volume when we get the tab ID
+chrome.runtime.onMessage.addListener((message) => {
+    if (message.action === 'tabIdReady') {
+        applyStoredVolume();
     }
 });
 
 // Detect media playback
 document.querySelectorAll("video, audio").forEach(media => {
     media.addEventListener('play', () => {
-        chrome.runtime.sendMessage({
-            action: 'mediaPlaying',
-            tabId: tabId
-        });
+        if (tabId) {
+            chrome.runtime.sendMessage({
+                action: 'mediaPlaying',
+                tabId: tabId
+            });
+        }
     });
 });
 
@@ -32,22 +49,38 @@ const observer = new MutationObserver((mutations) => {
         mutation.addedNodes.forEach(node => {
             if (node.tagName === 'VIDEO' || node.tagName === 'AUDIO') {
                 // Get stored volume and apply it to new media
-                chrome.storage.sync.get(['soundTabs'], (result) => {
-                    const volume = result.soundTabs?.[tabId]?.volume;
-                    if (volume !== undefined) {
-                        node.volume = volume;
-                    }
-                });
+                if (tabId) {
+                    chrome.storage.sync.get(['soundTabs'], (result) => {
+                        const volume = result.soundTabs?.[tabId]?.volume;
+                        if (volume !== undefined) {
+                            node.volume = volume;
+                        }
+                    });
+                }
             }
         });
     });
 });
 
-// Start observing the document body for new media elements
-observer.observe(document.body, {
-    childList: true,
-    subtree: true
-});
+// Wait for DOM to be ready before setting up observer
+function setupObserver() {
+    if (document.body) {
+        try {
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        } catch (error) {
+            console.error('Failed to setup MutationObserver:', error);
+        }
+    } else {
+        // If body isn't ready yet, wait for DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', setupObserver);
+    }
+}
+
+// Start observing
+setupObserver();
 
 // Special handling for YouTube
 if (window.location.hostname.includes('youtube.com')) {
@@ -56,7 +89,7 @@ if (window.location.hostname.includes('youtube.com')) {
     if (ytPlayer) {
         ytPlayer.addEventListener('onStateChange', (event) => {
             // When video changes (state 1 is playing)
-            if (event.data === 1) {
+            if (event.data === 1 && tabId) {
                 chrome.storage.sync.get(['soundTabs'], (result) => {
                     const volume = result.soundTabs?.[tabId]?.volume;
                     if (volume !== undefined) {
