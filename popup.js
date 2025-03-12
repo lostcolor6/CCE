@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 slider.type = "range";
                 slider.min = "0";
                 slider.max = "2";
-                slider.step = "0.1";
+                slider.step = "0.02";
                 // Ensure volume is properly parsed and slider position is correct
                 const initialVolume = parseFloat(tabInfo.volume);
                 slider.value = isNaN(initialVolume) ? 1 : initialVolume;
