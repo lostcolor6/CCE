@@ -49,6 +49,28 @@ observer.observe(document.body, {
     subtree: true
 });
 
+// Special handling for YouTube
+if (window.location.hostname.includes('youtube.com')) {
+    // Watch for YouTube's video change events
+    const ytPlayer = document.getElementById('movie_player');
+    if (ytPlayer) {
+        ytPlayer.addEventListener('onStateChange', (event) => {
+            // When video changes (state 1 is playing)
+            if (event.data === 1) {
+                chrome.storage.sync.get(['soundTabs'], (result) => {
+                    const volume = result.soundTabs?.[tabId]?.volume;
+                    if (volume !== undefined) {
+                        const video = document.querySelector('video');
+                        if (video) {
+                            video.volume = volume;
+                        }
+                    }
+                });
+            }
+        });
+    }
+}
+
 // Handle volume adjustment
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "setVolume") {

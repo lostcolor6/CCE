@@ -34,8 +34,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                 slider.className = "slider";
                 slider.dataset.tabId = tabId;
 
+                // Create percentage display
+                let percentage = document.createElement("span");
+                percentage.className = "percentage";
+                percentage.textContent = `${Math.round(parseFloat(slider.value) * 50)}%`;
+
                 slider.oninput = () => {
                     const volume = parseFloat(slider.value);
+                    // Update percentage display
+                    percentage.textContent = `${Math.round(volume * 50)}%`;
                     // Update storage
                     chrome.storage.sync.get(['soundTabs'], (result) => {
                         const soundTabs = result.soundTabs || {};
@@ -53,7 +60,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                     });
                 };
 
+                
                 container.appendChild(label);
+                container.appendChild(percentage);
                 container.appendChild(slider);
                 slidersDiv.appendChild(container);
             }
