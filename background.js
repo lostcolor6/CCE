@@ -1,3 +1,11 @@
+// Handle tab ID requests from content scripts
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'getTabId' && sender.tab) {
+        sendResponse({tabId: sender.tab.id});
+    }
+    return true; // Keep message channel open for async response
+});
+
 // Track tabs that have ever played sound and their volumes
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.audible !== undefined) {
