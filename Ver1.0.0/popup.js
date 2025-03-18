@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const slider = document.createElement("input");
             slider.type = "range";
             slider.min = "0";
-            slider.max = "300";
+            slider.max = "100";
             slider.value = storedVolumes[tab.id] || 100;
         
             const percentage = document.createElement("span");
