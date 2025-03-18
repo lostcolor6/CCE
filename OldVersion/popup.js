@@ -46,21 +46,25 @@ document.addEventListener("DOMContentLoaded", async () => {
                     // Update storage
                     chrome.storage.sync.get(['soundTabs'], (result) => {
                         const soundTabs = result.soundTabs || {};
-                        if (soundTabs[tabId]) {
-                            soundTabs[tabId].volume = volume;
-                            chrome.storage.sync.set({ soundTabs });
+                        if (!soundTabs[tabId]) {
+                            soundTabs[tabId] = {};
                         }
+                        soundTabs[tabId].volume = volume;
+                        chrome.storage.sync.set({ soundTabs });
                     });
-                    
+
                     // Update tab volume
                     chrome.scripting.executeScript({
                         target: { tabId: Number(tabId) },
-                        function: setVolume,
+                        func: (volume) => {
+                            document.querySelectorAll("video, audio").forEach(media => {
+                                media.volume = volume;
+                            });
+                        },
                         args: [volume]
                     });
                 };
 
-                
                 container.appendChild(label);
                 container.appendChild(percentage);
                 container.appendChild(slider);
@@ -69,12 +73,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 });
-
-function setVolume(volume) {
-    document.querySelectorAll("video, audio").forEach(media => {
-        media.volume = volume;
-    });
-}
 
 document.addEventListener("DOMContentLoaded", () => {
     const volumeSlider = document.getElementById("volume-slider");
