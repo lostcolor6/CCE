@@ -21,7 +21,7 @@ body.dark-mode {
 
 button {
     display: block;
-    width: 100%;
+    width: 25%;
     padding: 8px;
     margin-bottom: 10px;
     background-color: #007bff;
@@ -44,16 +44,41 @@ button {
     padding: 5px;
     background: rgba(0, 0, 0, 0.1);
     border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+    height: 30px; /* Fixed height to prevent twitching */
 }
 
-.tab-title {
+/* Scrolling tab title */
+.marquee {
     flex: 1;
-    cursor: pointer;
-    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+    display: inline-block;
+    cursor: pointer;  /* Add cursor pointer to indicate it's clickable */
+}
+
+.marquee span {
+    display: inline-block;
+    position: relative;
+    animation: marquee 3s linear infinite;
+}
+
+/* Hover effect to indicate clickability */
+.marquee:hover span {
+    text-decoration: underline;  /* Adds underline effect on hover */
+    color: #007bff;  /* Changes text color on hover */
+}
+
+@keyframes marquee {
+    from { transform: translateX(0%); }
+    to { transform: translateX(-35%); }
 }
 
 input[type="range"] {
-    flex: 2;
+    flex: none;
+    width: 200px;
     margin: 0 10px;
 }
 
