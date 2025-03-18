@@ -110,3 +110,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         applyVolume(message.volume);
     }
 });
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === "applyVolume") {
+        const { volume } = message;
+        const audios = document.querySelectorAll("audio, video");
+        audios.forEach(audio => audio.volume = volume);
+    }
+});

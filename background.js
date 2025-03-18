@@ -37,3 +37,52 @@ chrome.tabs.onRemoved.addListener((tabId) => {
     });
 });
 
+// Store volume settings for each tab
+const tabVolumes = {};
+
+// Listen for messages from the popup or content script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === "setVolume") {
+        const { tabId, volume } = message;
+        tabVolumes[tabId] = volume;
+
+        // Save the volume in Chrome storage for persistence
+        chrome.storage.local.set({ [tabId]: volume });
+
+        // Apply the volume to the tab
+        chrome.scripting.executeScript({
+            target: { tabId: tabId },
+            func: (volume) => {
+                const audios = document.querySelectorAll("audio, video");
+                audios.forEach(audio => audio.volume = volume);
+            },
+            args: [volume]
+        });
+    }
+});
+
+// Reapply volume when a tab updates or reloads
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status === "complete") {
+        chrome.storage.local.get([tabId.toString()], (result) => {
+            const volume = result[tabId];
+            if (volume !== undefined) {
+                chrome.scripting.executeScript({
+                    target: { tabId: tabId },
+                    func: (volume) => {
+                        const audios = document.querySelectorAll("audio, video");
+                        audios.forEach(audio => audio.volume = volume);
+                    },
+                    args: [volume]
+                });
+            }
+        });
+    }
+});
+
+// Clean up when a tab is closed
+chrome.tabs.onRemoved.addListener((tabId) => {
+    delete tabVolumes[tabId];
+    chrome.storage.local.remove(tabId.toString());
+});
+

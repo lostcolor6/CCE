@@ -75,3 +75,33 @@ function setVolume(volume) {
         media.volume = volume;
     });
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const volumeSlider = document.getElementById("volume-slider");
+
+    // Get the current tab
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const currentTab = tabs[0];
+        const tabId = currentTab.id;
+
+        // Load the saved volume for the current tab
+        chrome.storage.local.get([tabId.toString()], (result) => {
+            const savedVolume = result[tabId];
+            if (savedVolume !== undefined) {
+                volumeSlider.value = savedVolume * 100; // Slider expects 0-100
+            }
+        });
+
+        // Listen for slider changes
+        volumeSlider.addEventListener("input", (event) => {
+            const volume = event.target.value / 100; // Convert to 0-1 range
+
+            // Send the volume to the background script
+            chrome.runtime.sendMessage({
+                type: "setVolume",
+                tabId: tabId,
+                volume: volume
+            });
+        });
+    });
+});
