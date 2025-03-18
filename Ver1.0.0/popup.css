@@ -1,0 +1,63 @@
+:root {
+    --bg-light: #ffffff;
+    --text-light: #000000;
+    --bg-dark: #1e1e1e;
+    --text-dark: #ffffff;
+}
+
+body {
+    width: 400px;
+    padding: 10px;
+    background-color: var(--bg-light);
+    color: var(--text-light);
+    font-family: Arial, sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-mode {
+    background-color: var(--bg-dark);
+    color: var(--text-dark);
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#tabs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tab-entry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+.tab-title {
+    flex: 1;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+input[type="range"] {
+    flex: 2;
+    margin: 0 10px;
+}
+
+.volume-percentage {
+    width: 40px;
+    text-align: center;
+}
