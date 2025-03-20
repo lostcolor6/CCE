@@ -1,8 +1,10 @@
 {
     "manifest_version": 3,
-    "name": "Tab Volume Control",
-    "version": "1.0",
-    "description": "Adjust and sync volume per tab",
+
+    "name": "Custom Chrome Extension",
+    "version": "1.0.0",
+    "description": "A extension with a varity of functions. by lost_color @: https://github.com/lostcolor6/CCE",
+
     "permissions": ["tabs", "storage", "scripting"],
     "host_permissions": ["<all_urls>"],
     "background": {
@@ -10,6 +12,13 @@
     },
     "action": {
       "default_popup": "popup.html"
-    }
+
+    },
+    "icons": {
+    "16": "icon.PNG",
+    "48": "icon.PNG",
+    "128": "icon.PNG"
+}
+
   }
   
