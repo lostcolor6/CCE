@@ -61,3 +61,8 @@ The extension requires the following permissions (no need to do anything/ this i
 - Storage: To save and retrieve volume settings and theme preferences.
 - Scripting: To inject scripts into web pages for volume control.
 - Host Permissions: To access all URLs for media element manipulation.
+
+
+
+### Author 
+## lost_color / lostcolor6
