@@ -34,26 +34,39 @@ document.addEventListener("DOMContentLoaded", async () => {
                 slider.className = "slider";
                 slider.dataset.tabId = tabId;
 
+                // Create percentage display
+                let percentage = document.createElement("span");
+                percentage.className = "percentage";
+                percentage.textContent = `${Math.round(parseFloat(slider.value) * 50)}%`;
+
                 slider.oninput = () => {
                     const volume = parseFloat(slider.value);
+                    // Update percentage display
+                    percentage.textContent = `${Math.round(volume * 50)}%`;
                     // Update storage
                     chrome.storage.sync.get(['soundTabs'], (result) => {
                         const soundTabs = result.soundTabs || {};
-                        if (soundTabs[tabId]) {
-                            soundTabs[tabId].volume = volume;
-                            chrome.storage.sync.set({ soundTabs });
+                        if (!soundTabs[tabId]) {
+                            soundTabs[tabId] = {};
                         }
+                        soundTabs[tabId].volume = volume;
+                        chrome.storage.sync.set({ soundTabs });
                     });
-                    
+
                     // Update tab volume
                     chrome.scripting.executeScript({
                         target: { tabId: Number(tabId) },
-                        function: setVolume,
+                        func: (volume) => {
+                            document.querySelectorAll("video, audio").forEach(media => {
+                                media.volume = volume;
+                            });
+                        },
                         args: [volume]
                     });
                 };
 
                 container.appendChild(label);
+                container.appendChild(percentage);
                 container.appendChild(slider);
                 slidersDiv.appendChild(container);
             }
@@ -61,8 +74,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
-function setVolume(volume) {
-    document.querySelectorAll("video, audio").forEach(media => {
-        media.volume = volume;
+document.addEventListener("DOMContentLoaded", () => {
+    const volumeSlider = document.getElementById("volume-slider");
+
+    // Get the current tab
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const currentTab = tabs[0];
+        const tabId = currentTab.id;
+
+        // Load the saved volume for the current tab
+        chrome.storage.local.get([tabId.toString()], (result) => {
+            const savedVolume = result[tabId];
+            if (savedVolume !== undefined) {
+                volumeSlider.value = savedVolume * 100; // Slider expects 0-100
+            }
+        });
+
+        // Listen for slider changes
+        volumeSlider.addEventListener("input", (event) => {
+            const volume = event.target.value / 100; // Convert to 0-1 range
+
+            // Send the volume to the background script
+            chrome.runtime.sendMessage({
+                type: "setVolume",
+                tabId: tabId,
+                volume: volume
+            });
+        });
     });
-}
+});
