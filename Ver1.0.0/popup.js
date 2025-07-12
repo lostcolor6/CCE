@@ -22,12 +22,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         chrome.storage.local.set({ darkMode: themeToggle.checked });
     });
 
+
     // Toggle bass boost visibility
     bassToggle.addEventListener("change", () => {
         bassBoostEnabled = bassToggle.checked;
         chrome.storage.local.set({ bassBoostEnabled: bassBoostEnabled });
         updatePopup(); // Refresh to show/hide bass controls
     });
+
 
     // Convert slider position to volume percentage
     function sliderToVolume(sliderValue) {
@@ -51,6 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+
     async function updatePopup() {
         const tabs = await chrome.tabs.query({ audible: true });
         const storedVolumes = await chrome.storage.local.get(null);
@@ -59,6 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         tabs.forEach(tab => {
             const tabDiv = document.createElement("div");
             tabDiv.classList.add("tab-entry");
+
         
             const marqueeContainer = document.createElement("div");
             marqueeContainer.classList.add("marquee");
@@ -68,6 +72,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             
             marqueeContainer.onclick = () => chrome.tabs.update(tab.id, { active: true });
         
+
             const controlsDiv = document.createElement("div");
             controlsDiv.classList.add("controls");
             
@@ -83,6 +88,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             volumeSlider.type = "range";
             volumeSlider.min = "0";
             volumeSlider.max = "140"; // 0-100 (fine) + 100-500 in 40 steps of 10% each
+
             
             // Set default value (100% = slider position 100)
             const storedVolume = storedVolumes[tab.id] || 100;
@@ -142,8 +148,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         
             tabDiv.appendChild(marqueeContainer);
+
             tabDiv.appendChild(controlsDiv);
-            tabsList.appendChild(tabDiv);
+
         });
     }
 
