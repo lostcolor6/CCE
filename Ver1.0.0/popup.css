@@ -6,7 +6,7 @@
 }
 
 body {
-    width: 400px;
+    width: 450px;
     padding: 10px;
     background-color: var(--bg-light);
     color: var(--text-light);
@@ -31,6 +31,69 @@ button {
     cursor: pointer;
 }
 
+.toggle-container {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 10px;
+}
+
+.theme-toggle-container,
+.bass-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #007bff;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.theme-label {
+    font-size: 12px;
+    font-weight: bold;
+}
+
 #tabs-list {
     display: flex;
     flex-direction: column;
@@ -39,24 +102,22 @@ button {
 
 .tab-entry {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 5px;
+    flex-direction: column;
+    padding: 10px;
     background: rgba(0, 0, 0, 0.1);
     border-radius: 5px;
     overflow: hidden;
     position: relative;
-    height: 30px; /* Fixed height to prevent twitching */
 }
 
 /* Scrolling tab title */
 .marquee {
-    flex: 1;
     white-space: nowrap;
     overflow: hidden;
     position: relative;
     display: inline-block;
-    cursor: pointer;  /* Add cursor pointer to indicate it's clickable */
+    cursor: pointer;
+    margin-bottom: 10px;
 }
 
 .marquee span {
@@ -67,8 +128,8 @@ button {
 
 /* Hover effect to indicate clickability */
 .marquee:hover span {
-    text-decoration: underline;  /* Adds underline effect on hover */
-    color: #007bff;  /* Changes text color on hover */
+    text-decoration: underline;
+    color: #007bff;
 }
 
 @keyframes marquee {
@@ -76,13 +137,39 @@ button {
     to { transform: translateX(-65%); }
 }
 
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.slider-label {
+    width: 35px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
 input[type="range"] {
-    flex: none;
-    width: 200px;
-    margin: 0 10px;
+    flex: 1;
+    margin: 0;
 }
 
 .volume-percentage {
     width: 40px;
     text-align: center;
+    font-size: 12px;
+}
+
+.bass-container {
+    display: none;
+}
+
+.bass-container.show {
+    display: flex;
 }

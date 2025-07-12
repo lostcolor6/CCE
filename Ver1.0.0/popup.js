@@ -1,12 +1,18 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const tabsList = document.getElementById("tabs-list");
     const themeToggle = document.getElementById("theme-toggle");
+    const bassToggle = document.getElementById("bass-toggle");
+    let bassBoostEnabled = false;
 
-    // Load dark mode setting
-    chrome.storage.local.get(["darkMode"], (data) => {
+    // Load settings
+    chrome.storage.local.get(["darkMode", "bassBoostEnabled"], (data) => {
         if (data.darkMode) {
             document.body.classList.add("dark-mode");
             themeToggle.checked = true;
+        }
+        if (data.bassBoostEnabled) {
+            bassBoostEnabled = true;
+            bassToggle.checked = true;
         }
     });
 
@@ -14,6 +20,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     themeToggle.addEventListener("change", () => {
         document.body.classList.toggle("dark-mode");
         chrome.storage.local.set({ darkMode: themeToggle.checked });
+    });
+
+    // Toggle bass boost visibility
+    bassToggle.addEventListener("change", () => {
+        bassBoostEnabled = bassToggle.checked;
+        chrome.storage.local.set({ bassBoostEnabled: bassBoostEnabled });
+        updatePopup(); // Refresh to show/hide bass controls
     });
 
     // Convert slider position to volume percentage
@@ -55,31 +68,81 @@ document.addEventListener("DOMContentLoaded", async () => {
             
             marqueeContainer.onclick = () => chrome.tabs.update(tab.id, { active: true });
         
-            const slider = document.createElement("input");
-            slider.type = "range";
-            slider.min = "0";
-            slider.max = "140"; // 0-100 (fine) + 100-500 in 40 steps of 10% each
+            const controlsDiv = document.createElement("div");
+            controlsDiv.classList.add("controls");
+            
+            // Volume slider
+            const volumeContainer = document.createElement("div");
+            volumeContainer.classList.add("slider-container");
+            
+            const volumeLabel = document.createElement("span");
+            volumeLabel.textContent = "Vol:";
+            volumeLabel.classList.add("slider-label");
+            
+            const volumeSlider = document.createElement("input");
+            volumeSlider.type = "range";
+            volumeSlider.min = "0";
+            volumeSlider.max = "140"; // 0-100 (fine) + 100-500 in 40 steps of 10% each
             
             // Set default value (100% = slider position 100)
             const storedVolume = storedVolumes[tab.id] || 100;
-            slider.value = volumeToSlider(storedVolume);
+            volumeSlider.value = volumeToSlider(storedVolume);
         
-            const percentage = document.createElement("span");
-            percentage.classList.add("volume-percentage");
-            percentage.textContent = sliderToVolume(slider.value) + "%";
+            const volumePercentage = document.createElement("span");
+            volumePercentage.classList.add("volume-percentage");
+            volumePercentage.textContent = sliderToVolume(volumeSlider.value) + "%";
         
-            slider.oninput = () => {
-                const volumePercent = sliderToVolume(slider.value);
+            volumeSlider.oninput = () => {
+                const volumePercent = sliderToVolume(volumeSlider.value);
                 const volume = volumePercent / 100; // This now goes from 0.0 to 5.0
-                percentage.textContent = volumePercent + "%";
+                volumePercentage.textContent = volumePercent + "%";
                 chrome.storage.local.set({ [tab.id]: volumePercent });
         
                 chrome.tabs.sendMessage(tab.id, { action: "updateVolume", tabId: tab.id, volume });
             };
+            
+            volumeContainer.appendChild(volumeLabel);
+            volumeContainer.appendChild(volumeSlider);
+            volumeContainer.appendChild(volumePercentage);
+            
+            controlsDiv.appendChild(volumeContainer);
+            
+            // Bass boost slider (only show if enabled)
+            if (bassBoostEnabled) {
+                const bassContainer = document.createElement("div");
+                bassContainer.classList.add("slider-container", "bass-container", "show");
+                
+                const bassLabel = document.createElement("span");
+                bassLabel.textContent = "Bass:";
+                bassLabel.classList.add("slider-label");
+                
+                const bassSlider = document.createElement("input");
+                bassSlider.type = "range";
+                bassSlider.min = "0";
+                bassSlider.max = "10";
+                bassSlider.value = storedVolumes[`bass_${tab.id}`] || 0;
+                
+                const bassValue = document.createElement("span");
+                bassValue.classList.add("volume-percentage");
+                bassValue.textContent = bassSlider.value;
+                
+                bassSlider.oninput = () => {
+                    const bassBoost = parseInt(bassSlider.value);
+                    bassValue.textContent = bassBoost;
+                    chrome.storage.local.set({ [`bass_${tab.id}`]: bassBoost });
+                    
+                    chrome.tabs.sendMessage(tab.id, { action: "updateBassBoost", tabId: tab.id, bassBoost });
+                };
+                
+                bassContainer.appendChild(bassLabel);
+                bassContainer.appendChild(bassSlider);
+                bassContainer.appendChild(bassValue);
+                
+                controlsDiv.appendChild(bassContainer);
+            }
         
             tabDiv.appendChild(marqueeContainer);
-            tabDiv.appendChild(slider);
-            tabDiv.appendChild(percentage);
+            tabDiv.appendChild(controlsDiv);
             tabsList.appendChild(tabDiv);
         });
     }
