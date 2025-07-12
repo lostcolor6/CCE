@@ -16,6 +16,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         chrome.storage.local.set({ darkMode: themeToggle.checked });
     });
 
+    // Convert slider position to volume percentage
+    function sliderToVolume(sliderValue) {
+        const pos = parseInt(sliderValue);
+        if (pos <= 100) {
+            // Fine control: 0-100% (1% increments)
+            return pos;
+        } else {
+            // Coarse control: 100-500% (10% increments)
+            return 100 + ((pos - 100) * 10);
+        }
+    }
+
+    // Convert volume percentage to slider position
+    function volumeToSlider(volume) {
+        const vol = parseInt(volume);
+        if (vol <= 100) {
+            return vol;
+        } else {
+            return 100 + Math.round((vol - 100) / 10);
+        }
+    }
+
     async function updatePopup() {
         const tabs = await chrome.tabs.query({ audible: true });
         const storedVolumes = await chrome.storage.local.get(null);
@@ -36,17 +58,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             const slider = document.createElement("input");
             slider.type = "range";
             slider.min = "0";
-            slider.max = "100";
-            slider.value = storedVolumes[tab.id] || 100;
+            slider.max = "140"; // 0-100 (fine) + 100-500 in 40 steps of 10% each
+            
+            // Set default value (100% = slider position 100)
+            const storedVolume = storedVolumes[tab.id] || 100;
+            slider.value = volumeToSlider(storedVolume);
         
             const percentage = document.createElement("span");
             percentage.classList.add("volume-percentage");
-            percentage.textContent = slider.value + "%";
+            percentage.textContent = sliderToVolume(slider.value) + "%";
         
             slider.oninput = () => {
-                const volume = slider.value / 100;
-                percentage.textContent = slider.value + "%";
-                chrome.storage.local.set({ [tab.id]: slider.value });
+                const volumePercent = sliderToVolume(slider.value);
+                const volume = volumePercent / 100; // This now goes from 0.0 to 5.0
+                percentage.textContent = volumePercent + "%";
+                chrome.storage.local.set({ [tab.id]: volumePercent });
         
                 chrome.tabs.sendMessage(tab.id, { action: "updateVolume", tabId: tab.id, volume });
             };
