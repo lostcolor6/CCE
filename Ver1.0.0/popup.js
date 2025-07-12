@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         chrome.storage.local.set({ darkMode: themeToggle.checked });
     });
 
+
     // Convert slider position to volume percentage
     function sliderToVolume(sliderValue) {
         const pos = parseInt(sliderValue);
@@ -38,6 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+
     async function updatePopup() {
         const tabs = await chrome.tabs.query({ audible: true });
         const storedVolumes = await chrome.storage.local.get(null);
@@ -46,6 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         tabs.forEach(tab => {
             const tabDiv = document.createElement("div");
             tabDiv.classList.add("tab-entry");
+
         
             const marqueeContainer = document.createElement("div");
             marqueeContainer.classList.add("marquee");
@@ -55,6 +58,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             
             marqueeContainer.onclick = () => chrome.tabs.update(tab.id, { active: true });
         
+
             const slider = document.createElement("input");
             slider.type = "range";
             slider.min = "0";
@@ -80,6 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             tabDiv.appendChild(marqueeContainer);
             tabDiv.appendChild(slider);
             tabDiv.appendChild(percentage);
+
             tabsList.appendChild(tabDiv);
         });
     }
