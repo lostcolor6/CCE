@@ -12,7 +12,7 @@ browserAPI.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 
 browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === "getTabId") {
+    if (message.action === "getTabId" && sender.tab) {
         sendResponse(sender.tab.id);
     }
 });
