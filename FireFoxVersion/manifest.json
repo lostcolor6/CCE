@@ -1,0 +1,38 @@
+{
+    "manifest_version": 2,
+    "name": "Custom Chrome Extension - Firefox",
+    "version": "1.0.0",
+    "description": "An extension with a variety of functions. by lost_color @: https://github.com/lostcolor6/CCE",
+    "permissions": ["tabs", "storage", "<all_urls>"],
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": false
+    },
+    "browser_action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "icon.PNG",
+            "48": "icon.PNG",
+            "128": "icon.PNG"
+        }
+    },
+    "icons": {
+        "16": "icon.PNG",
+        "48": "icon.PNG",
+        "128": "icon.PNG"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"],
+            "run_at": "document_end"
+        }
+    ],
+    "applications": {
+        "gecko": {
+            "id": "{12345678-1234-1234-1234-123456789012}",
+            "strict_min_version": "57.0"
+        }
+    }
+}
+  
